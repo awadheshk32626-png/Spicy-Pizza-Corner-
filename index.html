@@ -15,7 +15,7 @@ body{
 }
 header{
   background:#111;
-  color:white;
+  color:#fff;
   padding:22px 15px;
   text-align:center;
   position:sticky;
@@ -31,17 +31,16 @@ header p{margin:7px 0 0;color:#ddd}
   padding:15px;
 }
 
-.category{
-  margin:25px 0;
-}
+.category{margin:25px 0}
+
 .category-title{
   background:#111;
-  color:white;
+  color:#fff;
   padding:13px 15px;
   border-radius:10px;
   font-size:20px;
   margin-bottom:14px;
-
+}
 
 .items{
   display:grid;
@@ -50,7 +49,7 @@ header p{margin:7px 0 0;color:#ddd}
 }
 
 .card{
-  background:white;
+  background:#fff;
   border-radius:14px;
   overflow:hidden;
   box-shadow:0 2px 10px #0001;
@@ -61,7 +60,6 @@ header p{margin:7px 0 0;color:#ddd}
   width:100%;
   height:180px;
   object-fit:cover;
-  background:#eee;
 }
 
 .no-img{
@@ -70,11 +68,16 @@ header p{margin:7px 0 0;color:#ddd}
   align-items:center;
   justify-content:center;
   background:#eee;
-  font-size:55px;
+  font-size:65px;
 }
 
 .card-content{padding:15px}
-.card h3{margin:0 0 7px;font-size:18px}
+
+.card h3{
+  margin:0 0 7px;
+  font-size:18px;
+}
+
 .desc{
   font-size:13px;
   color:#666;
@@ -88,7 +91,7 @@ select{
   margin:6px 0;
   border:1px solid #ddd;
   border-radius:8px;
-  background:white;
+  background:#fff;
   font-size:14px;
 }
 
@@ -108,7 +111,7 @@ button{
 .add-btn{
   width:100%;
   background:#111;
-  color:white;
+  color:#fff;
   font-size:15px;
   font-weight:bold;
 }
@@ -132,7 +135,7 @@ button{
   bottom:15px;
   width:340px;
   max-width:calc(100% - 30px);
-  background:white;
+  background:#fff;
   border-radius:15px;
   box-shadow:0 5px 25px #0003;
   z-index:20;
@@ -141,7 +144,7 @@ button{
 
 .cart-head{
   background:#111;
-  color:white;
+  color:#fff;
   padding:14px;
   font-weight:bold;
 }
@@ -158,6 +161,7 @@ button{
 }
 
 .cart-name{font-weight:bold}
+
 .cart-info{
   font-size:12px;
   color:#666;
@@ -179,6 +183,13 @@ button{
   font-size:18px;
 }
 
+.remove{
+  background:#fee;
+  color:#c00;
+  padding:5px 9px;
+  font-size:12px;
+}
+
 .cart-foot{
   padding:14px;
   border-top:1px solid #eee;
@@ -194,7 +205,11 @@ button{
 
 @media(max-width:600px){
   header h1{font-size:22px}
-  .items{grid-template-columns:1fr}
+
+  .items{
+    grid-template-columns:1fr;
+  }
+
   .cart{
     position:fixed;
     bottom:10px;
@@ -218,9 +233,11 @@ button{
 
 <div class="cart">
   <div class="cart-head">🛒 Your Cart</div>
+
   <div class="cart-body" id="cartItems">
     <div class="empty">Cart is empty</div>
   </div>
+
   <div class="cart-foot">
     Total: ₹<span id="cartTotal">0</span>
   </div>
@@ -242,17 +259,6 @@ const toppingList=[
   "Red Paprika",
   "Chilli Paneer"
 ];
-
-/*
-  IMAGE LAGANE KE LIYE:
-  Kisi bhi item ke image:"" me image URL daal dena.
-
-  Example:
-  image:"https://example.com/pizza.jpg"
-
-  Extra topping ka price abhi ₹0 rakha gaya hai,
-  kyunki topping price provide nahi ki gayi hai.
-*/
 
 const categories=[
 
@@ -350,113 +356,237 @@ const categories=[
 let cart=[];
 
 function money(n){
- return new Intl.NumberFormat("en-IN").format(n);
+  return new Intl.NumberFormat("en-IN").format(n);
 }
 
-function makeId(category,item){
- return (category+"-"+item).replace(/[^a-zA-Z0-9]/g,"");
+function makeId(category,item,index){
+  return (category+"-"+item+"-"+index)
+    .replace(/[^a-zA-Z0-9]/g,"");
 }
 
 function renderMenu(){
 
- const menu=document.getElementById("menu");
- menu.innerHTML="";
+  const menu=document.getElementById("menu");
+  menu.innerHTML="";
 
- categories.forEach((cat,ci)=>{
+  categories.forEach((cat,ci)=>{
 
-   const section=document.createElement("section");
-   section.className="category";
+    const section=document.createElement("section");
+    section.className="category";
 
-   section.innerHTML=
-   `<div class="category-title">${cat.name}</div>
-    <div class="items" id="cat-${ci}"></div>`;
+    section.innerHTML=`
+      <div class="category-title">${cat.name}</div>
+      <div class="items"></div>
+    `;
 
-   menu.appendChild(section);
+    menu.appendChild(section);
 
-   const itemsBox=section.querySelector(".items");
+    const itemsBox=section.querySelector(".items");
 
-   cat.items.forEach((item,ii)=>{
+    cat.items.forEach((item,ii)=>{
 
-     const id=makeId(cat.name+ci,item[0]+ii);
+      const id=makeId(cat.name,item[0],ii);
 
-     const card=document.createElement("div");
-     card.className="card";
+      const card=document.createElement("div");
+      card.className="card";
 
-     card.innerHTML=`
+      card.innerHTML=`
 
-       <div id="image-${id}">
-         <div class="no-img">🍕</div>
-       </div>
+        <div class="no-img">🍕</div>
 
-       <div class="card-content">
+        <div class="card-content">
 
-         <h3>${item[0]}</h3>
+          <h3>${item[0]}</h3>
 
-         <div class="desc">${item[1]}</div>
+          <div class="desc">${item[1]}</div>
 
-         <select id="size-${id}" onchange="updatePrice('${id}',${ci})">
-           <option value="Regular">Regular</option>
-           <option value="Medium">Medium</option>
-           <option value="Large">Large</option>
-         </select>
+          <select id="size-${id}" onchange="updatePrice('${id}',${ci})">
+            <option value="Regular">Regular</option>
+            <option value="Medium">Medium</option>
+            <option value="Large">Large</option>
+          </select>
 
-         <select id="cheese-${id}" onchange="updatePrice('${id}',${ci})">
-           <option value="single">Single Cheese</option>
-           <option value="double">Double Cheese</option>
-         </select>
+          <select id="cheese-${id}" onchange="updatePrice('${id}',${ci})">
+            <option value="single">Single Cheese</option>
+            <option value="double">Double Cheese</option>
+          </select>
 
-         <div class="toppings">
-           <b>➕ Extra Toppings</b><br>
-           <small>Extra toppings are currently free.</small>
-           <div id="tops-${id}">
-             ${toppingList.map((t,ti)=>`
-               <label>
-                 <input type="checkbox"
-                   value="${t}"
-                   data-item="${id}"
-                   onchange="checkToppings('${id}')">
-                 ${t}
-               </label>
-             `).join("")}
-           </div>
-         </div>
+          <div class="toppings">
+            <b>➕ Extra Toppings</b><br>
 
-         <div class="price">
-           ₹<span id="price-${id}">
-           ${cat.prices.single.Regular}
-           </span>
-         </div>
+            <div id="tops-${id}">
+              ${toppingList.map(t=>`
+                <label>
+                  <input
+                    type="checkbox"
+                    value="${t}"
+                    data-item="${id}"
+                  >
+                  ${t}
+                </label>
+              `).join("")}
+            </div>
+          </div>
 
-         <button class="add-btn"
-           onclick="addToCart(${ci},${ii},'${id}')">
-           🛒 Add to Cart
-         </button>
+          <div class="price">
+            ₹<span id="price-${id}">
+              ${cat.prices.single.Regular}
+            </span>
+          </div>
 
-       </div>
-     `;
+          <button
+            class="add-btn"
+            onclick="addToCart(${ci},${ii},'${id}')">
+            🛒 Add to Cart
+          </button>
 
-     itemsBox.appendChild(card);
-   });
- });
+        </div>
+      `;
+
+      itemsBox.appendChild(card);
+
+    });
+
+  });
+
 }
 
 function updatePrice(id,ci){
 
- const size=document.getElementById("size-"+id).value;
- const cheese=document.getElementById("cheese-"+id).value;
+  const size=document.getElementById("size-"+id).value;
+  const cheese=document.getElementById("cheese-"+id).value;
 
- const price=categories[ci].prices[cheese][size];
+  const price=categories[ci].prices[cheese][size];
 
- document.getElementById("price-"+id).innerText=money(price);
+  document.getElementById("price-"+id).innerText=money(price);
 }
 
-function checkToppings(id){
+function addToCart(ci,ii,id){
 
- const boxes=document.querySelectorAll(
-   `input[data-item="${id}"]:checked`
- );
+  const cat=categories[ci];
+  const item=cat.items[ii];
 
- const card=document.getElementById("tops-"+id);
+  const size=document.getElementById("size-"+id).value;
+  const cheese=document.getElementById("cheese-"+id).value;
 
- /*
-  Double Cheese Margher
+  const price=cat.prices[cheese][size];
+
+  const toppings=[
+    ...document.querySelectorAll(
+      `input[data-item="${id}"]:checked`
+    )
+  ].map(x=>x.value);
+
+  cart.push({
+    name:item[0],
+    size:size,
+    cheese:cheese==="single"
+      ? "Single Cheese"
+      : "Double Cheese",
+    toppings:toppings,
+    price:price
+  });
+
+  renderCart();
+}
+
+function changeQty(index,amount){
+
+  if(amount>0){
+    const item=cart[index];
+
+    cart.splice(index,0,{
+      ...item
+    });
+  }else{
+    cart.splice(index,1);
+  }
+
+  renderCart();
+}
+
+function removeItem(index){
+
+  cart.splice(index,1);
+  renderCart();
+}
+
+function renderCart(){
+
+  const box=document.getElementById("cartItems");
+  const totalBox=document.getElementById("cartTotal");
+
+  if(cart.length===0){
+
+    box.innerHTML=
+      `<div class="empty">Cart is empty</div>`;
+
+    totalBox.innerText="0";
+    return;
+  }
+
+  let total=0;
+
+  box.innerHTML=cart.map((item,index)=>{
+
+    total+=item.price;
+
+    return `
+      <div class="cart-item">
+
+        <div class="cart-name">
+          ${item.name}
+        </div>
+
+        <div class="cart-info">
+          ${item.size} • ${item.cheese}
+        </div>
+
+        ${
+          item.toppings.length
+          ?
+          `<div class="cart-info">
+             Extra: ${item.toppings.join(", ")}
+           </div>`
+          :
+          ""
+        }
+
+        <div>
+          ₹${money(item.price)}
+        </div>
+
+        <div class="qty">
+
+          <button onclick="changeQty(${index},-1)">
+            −
+          </button>
+
+          <span>1</span>
+
+          <button onclick="changeQty(${index},1)">
+            +
+          </button>
+
+          <button
+            class="remove"
+            onclick="removeItem(${index})">
+            Remove
+          </button>
+
+        </div>
+
+      </div>
+    `;
+
+  }).join("");
+
+  totalBox.innerText=money(total);
+}
+
+renderMenu();
+
+</script>
+
+</body>
+</html>
