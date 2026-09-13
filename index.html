@@ -1,1 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>SPC'S Pizza Corner</title>
 
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:#f7f7f7;
+  color:#222;
+}
+header{
+  background:#111;
+  color:white;
+  padding:22px 15px;
+  text-align:center;
+  position:sticky;
+  top:0;
+  z-index:10;
+}
+header h1{margin:0;font-size:26px}
+header p{margin:7px 0 0;color:#ddd}
+
+.container{
+  max-width:1100px;
+  margin:auto;
+  padding:15px;
+}
+
+.category{
+  margin:25px 0;
+}
+.category-title{
+  background:#111;
+  color:white;
+  padding:13px 15px;
+  border-radius:10px;
+  font-size:20px;
+  margin-bottom:14px;
+}
+
+.items{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(270px,1fr));
+  gap:15px;
+}
+
+.card{
+  background:white;
+  border-radius:14px;
+  overflow:hidden;
+  box-shadow:0 2px 10px #0001;
+  border:1px solid #eee;
+}
+
+.pizza-img{
+  width:100%;
+  height:180px;
+  object-fit:cover;
+  background:#eee;
+}
+
+.no-img{
+  height:180px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#eee;
+  font-size:55px;
+}
+
+.card-content{padding:15px}
+.card h3{margin:0 0 7px;font-size:18px}
+.desc{
+  font-size:13px;
+  color:#666;
+  min-height:40px;
+  line-height:1.5;
+}
+
+select{
+  width:100%;
+  padding:10px;
+  margin:6px 0;
+  border:1px solid #ddd;
+  border-radius:8px;
+  background:white;
+  font-size:14px;
+}
+
+.price{
+  font-size:20px;
+  font-weight:bold;
+  margin:8px 0;
+}
+
+button{
+  border:0;
+  border-radius:8px;
+  padding:11px 15px;
+  cursor:pointer;
+}
+
+.add-btn{
+  width:100%;
+  background:#111;
+  color:white;
+  font-size:15px;
+  font-weight:bold;
+}
+
+.toppings{
+  margin:8px 0;
+  padding:9px;
+  background:#fafafa;
+  border-radius:8px;
+  font-size:13px;
+}
+
+.toppings label{
+  display:inline-block;
+  margin:4px 5px 4px 0;
+}
+
+.cart{
+  position:fixed;
+  right:15px;
+  bottom:15px;
+  width:340px;
+  max-width:calc(100% - 30px);
+  background:white;
+  border-radius:15px;
+  box-shadow:0 5px 25px #0003;
+  z-index:20;
+  overflow:hidden;
+}
+
+.cart-head{
+  background:#111;
+  color:white;
+  padding:14px;
+  font-weight:bold;
+}
+
+.cart-body{
+  max-height:300px;
+  overflow:auto;
+  padding:10px;
+}
+
+.cart-item{
+  border-bottom:1px solid #eee;
+  padding:10px 0;
+}
+
+.cart-name{font-weight:bold}
+.cart-info{
+  font-size:12px;
+  color:#666;
+  margin:4px 0;
+}
+
+.qty{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-top:7px;
+}
+
+.qty button{
+  width:30px;
+  height:30px;
+  padding:0;
+  background:#eee;
+  font-size:18px;
+}
+
+.cart-foot{
+  padding:14px;
+  border-top:1px solid #eee;
+  font-size:18px;
+  font-weight:bold;
+}
+
+.empty{
+  text-align:center;
+  color:#888;
+  padding:20px;
+}
+
+@media(max-width:600px){
+  header h1{font-size:22px}
+  .items{grid-template-columns:1fr}
+  .cart{
+    position:fixed;
+    bottom:10px;
+    right:10px;
+    width:calc(100% - 20px);
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>🍕 SPC'S PIZZA CORNER</h1>
+  <p>Fresh • Hot • Delicious</p>
+</header>
+
+<div class="container">
+  <div id="menu"></div>
+</div>
+
+<div class="cart">
+  <div class="cart-head">🛒 Your Cart</div>
+  <div class="cart-body" id="cartItems">
+    <div class="empty">Cart is empty</div>
+  </div>
+  <div class="cart-foot">
+    Total: ₹<span id="cartTotal">0</span>
+  </div>
+</div>
+
+<script>
+
+const toppingList=[
+  "Onion",
+  "Capsicum",
+  "Mushroom",
+  "Tomato",
+  "Corn",
+  "Jalapeno",
+  "Black Olives",
+  "Green Olives",
+  "Paneer",
+  "Baby Corn",
+  "Red Paprika",
+  "Chilli Paneer"
+];
+
+/*
+  IMAGE LAGANE KE LIYE:
+  Kisi bhi item ke image:"" me image URL daal dena.
+
+  Example:
+  image:"https://example.com/pizza.jpg"
+
+  Extra topping ka price abhi ₹0 rakha gaya hai,
+  kyunki topping price provide nahi ki gayi hai.
+*/
+
+const categories=[
+
+{
+ name:"🍕 SPC'S SPECIALS",
+ prices:{
+   single:{Regular:220,Medium:310,Large:410},
+   double:{Regular:290,Medium:390,Large:490}
+ },
+ items:[
+  ["Veg Stack Pizza","Onion, Capsicum, Mushroom, Tomato, Corn, Jalapeno, Black Olives, Mozzarella Cheese"],
+  ["Tandoori Paneer Pizza","Tandoori Paneer, Onion, Capsicum, Mushroom, Corn, Mozzarella Cheese"],
+  ["Exotica Pizza","Red Paprika, Capsicum, Corn, Jalapeno, Paneer, Black Olives, Mozzarella Cheese"],
+  ["Veggie Supreme Pizza","Mushroom, Tomato, Baby Corn, Black Olives, Capsicum, Onion, Mozzarella Cheese"]
+ ]
+},
+
+{
+ name:"🧀 SPC'S VEG SUPREME DELIGHT",
+ prices:{
+   single:{Regular:190,Medium:260,Large:320},
+   double:{Regular:230,Medium:340,Large:410}
+ },
+ items:[
+  ["Yummy Pizza","Golden Corn, Jalapeno, Red Paprika, Mozzarella Cheese"],
+  ["Deluxe Veggie Pizza","Onion, Capsicum, Paneer, Sweet Corn, Black Olives, Mozzarella Cheese"],
+  ["Extra Paneer Pizza","Extra Paneer, Onion, Capsicum, Mozzarella Cheese"],
+  ["Chilli Paneer Pizza","Chilli Paneer, Onion, Capsicum, Tomato, Mozzarella Cheese"],
+  ["Double Cheese Margherita Pizza","Choose Any Four Toppings, Mozzarella Cheese"]
+ ]
+},
+
+{
+ name:"🌶️ SPC'S SPICY SPECIAL VEG",
+ prices:{
+   single:{Regular:170,Medium:210,Large:300},
+   double:{Regular:200,Medium:270,Large:370}
+ },
+ items:[
+  ["Mexican Green Wave Pizza","Onion, Capsicum, Fresh Tomato, Jalapeno, Mozzarella Cheese"],
+  ["Peppy Paneer Pizza","Paneer, Crisp Capsicum, Red Paprika, Mozzarella Cheese"],
+  ["Three Pepper Pizza","Capsicum, Jalapeno, Red Paprika, Mozzarella Cheese"],
+  ["Classic Pizza","Black Olive, Golden Corn, Jalapeno, Mozzarella Cheese"],
+  ["Mushroom Paneer Pizza","Onion, Mushroom, Paneer, Capsicum, Mozzarella Cheese"],
+  ["Spicy Special Pizza","Onion, Crisp Capsicum, Black Olives, Green Olives, Mozzarella Cheese"]
+ ]
+},
+
+{
+ name:"🥬 SPC'S TREAT VEG",
+ prices:{
+   single:{Regular:130,Medium:180,Large:240},
+   double:{Regular:160,Medium:230,Large:320}
+ },
+ items:[
+  ["Country Special Feast Pizza","Onion, Crisp Capsicum, Fresh Tomato, Mozzarella Cheese"],
+  ["Fresh Farm House Pizza","Onion, Crisp Capsicum, Fresh Tomato, Mushroom, Mozzarella Cheese"],
+  ["Desi Style Pizza","Special Spice, Onion, Capsicum, Tomato, Mozzarella Cheese"],
+  ["Paneer Tikka Pizza","Onion, Fresh Tomato, Paneer, Mozzarella Cheese"],
+  ["Italian Pizza","Baby Corn, Black Olives, Green Olives, Mozzarella Cheese"]
+ ]
+},
+
+{
+ name:"🥗 SPC'S SIMPLE VEG",
+ prices:{
+   single:{Regular:120,Medium:150,Large:210},
+   double:{Regular:150,Medium:210,Large:290}
+ },
+ items:[
+  ["Tomato Pizza","Tomato, Baby Corn, Mozzarella Cheese"],
+  ["Schezwan Pizza","Schezwan Sauce, Onion, Capsicum, Mozzarella Cheese"],
+  ["Paneer Special Pizza","Paneer, Green Chilli, Onion, Mozzarella Cheese"],
+  ["Mushroom Pizza","Onion, Mushroom, Mozzarella Cheese"]
+ ]
+},
+
+{
+ name:"🍕 SPC'S BASIC VEG",
+ prices:{
+   single:{Regular:99,Medium:140,Large:190},
+   double:{Regular:130,Medium:190,Large:270}
+ },
+ items:[
+  ["Margherita Pizza","Single Cheese Topping"],
+  ["Onion Pizza","Onion, Mozzarella Cheese"],
+  ["Capsicum Pizza","Capsicum, Mozzarella Cheese"],
+  ["Sweet Corn Pizza","Sweet Corn, Mozzarella Cheese"],
+  ["Cheese & Tomato Pizza","Tomato, Mozzarella Cheese"]
+ ]
+}
+
+];
+
+let cart=[];
+
+function money(n){
+ return new Intl.NumberFormat("en-IN").format(n);
+}
+
+function makeId(category,item){
+ return (category+"-"+item).replace(/[^a-zA-Z0-9]/g,"");
+}
+
+function renderMenu(){
+
+ const menu=document.getElementById("menu");
+ menu.innerHTML="";
+
+ categories.forEach((cat,ci)=>{
+
+   const section=document.createElement("section");
+   section.className="category";
+
+   section.innerHTML=
+   `<div class="category-title">${cat.name}</div>
+    <div class="items" id="cat-${ci}"></div>`;
+
+   menu.appendChild(section);
+
+   const itemsBox=section.querySelector(".items");
+
+   cat.items.forEach((item,ii)=>{
+
+     const id=makeId(cat.name+ci,item[0]+ii);
+
+     const card=document.createElement("div");
+     card.className="card";
+
+     card.innerHTML=`
+
+       <div id="image-${id}">
+         <div class="no-img">🍕</div>
+       </div>
+
+       <div class="card-content">
+
+         <h3>${item[0]}</h3>
+
+         <div class="desc">${item[1]}</div>
+
+         <select id="size-${id}" onchange="updatePrice('${id}',${ci})">
+           <option value="Regular">Regular</option>
+           <option value="Medium">Medium</option>
+           <option value="Large">Large</option>
+         </select>
+
+         <select id="cheese-${id}" onchange="updatePrice('${id}',${ci})">
+           <option value="single">Single Cheese</option>
+           <option value="double">Double Cheese</option>
+         </select>
+
+         <div class="toppings">
+           <b>➕ Extra Toppings</b><br>
+           <small>Extra toppings are currently free.</small>
+           <div id="tops-${id}">
+             ${toppingList.map((t,ti)=>`
+               <label>
+                 <input type="checkbox"
+                   value="${t}"
+                   data-item="${id}"
+                   onchange="checkToppings('${id}')">
+                 ${t}
+               </label>
+             `).join("")}
+           </div>
+         </div>
+
+         <div class="price">
+           ₹<span id="price-${id}">
+           ${cat.prices.single.Regular}
+           </span>
+         </div>
+
+         <button class="add-btn"
+           onclick="addToCart(${ci},${ii},'${id}')">
+           🛒 Add to Cart
+         </button>
+
+       </div>
+     `;
+
+     itemsBox.appendChild(card);
+   });
+ });
+}
+
+function updatePrice(id,ci){
+
+ const size=document.getElementById("size-"+id).value;
+ const cheese=document.getElementById("cheese-"+id).value;
+
+ const price=categories[ci].prices[cheese][size];
+
+ document.getElementById("price-"+id).innerText=money(price);
+}
+
+function checkToppings(id){
+
+ const boxes=document.querySelectorAll(
+   `input[data-item="${id}"]:checked`
+ );
+
+ const card=document.getElementById("tops-"+id);
+
+ /*
+  Double Cheese Margher
